@@ -4,6 +4,22 @@ Running log of synthesized team decisions, maintained by the `chief-developer` a
 
 ---
 
+## 2026-08-10 — Drama detail sheet reachable from Calendar and Watching (direct user request, not a full advocate/skeptic round)
+
+**Context:** the user asked for the Discovery tap-to-see-the-summary behaviour on the Calendar's episode rows and the Currently Watching tiles as well. A direct feature request with no sourcing, licensing, or positioning question attached, so it was implemented rather than routed through a specialist round.
+
+**What was built:** the existing detail bottom sheet (Section 6) is now opened from a Calendar episode row and from a Watching tile, in addition to Discovery tiles and Your Picks rows. Each tile's own controls are excluded from the tap target — mark/unmark on the Calendar row, and the episode slider, star row, Mark-Ep and Drop buttons on the Watching tile — so no existing gesture changes meaning. Keyboard parity: the Calendar row is itself the focusable control; on the Watching tile the title is, since a tile containing a slider and several buttons can't be one control.
+
+**Two data gaps surfaced while wiring it up:**
+- Detail lookup searched only the Discovery list, but a promoted pick is spliced out of that list — exactly the dramas Calendar and Watching show. Lookup now spans both lists.
+- Promotion dropped `synopsis` / `writer` / `director` / `dateLabel`, so a drama's sheet went blank the moment it moved into Watching. Those now ride along through promotion and through the localStorage round-trip.
+
+Seeded Watching dramas still have no synopsis text, and none was invented for them — Section 14's sourcing rules say leave it blank rather than paraphrase MDL/DramaWiki prose. The sheet now says "No summary on file for this one yet." instead of rendering an empty paragraph.
+
+**Outcome:** Adopted. Spec updated — Section 6.
+
+---
+
 ## 2026-08-01 — App name "KALENDAR" reviewed: keep for now, flagged provisional (not a full advocate/skeptic round)
 
 **Context:** the user asked directly about copyright/trademark exposure on the name "KALENDAR" and whether similar K-drama tracking apps already exist, then asked for the growth-marketing-lead specialist's opinion specifically on naming and positioning. Prior research this session (web search, not this agent) found: at least two unrelated existing apps already named "Kalendar" (a French and a Greek scheduling app, both on Google Play, neither K-drama-related); no confirmed U.S. trademark registration found for "KALENDAR" in software; and a real competitive field — MyDramaList (incumbent), K-Drama Trackr, KDramaTracker, and Drama Track as close feature-alike trackers, plus general cross-media trackers (SIMKL, Trakt, Kitsu, AniList) people also use for K-dramas.

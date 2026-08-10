@@ -81,6 +81,8 @@ A drama enters "Currently Watching" automatically once the user has marked it In
 - Tapping a discovery tile flips it to reveal detail on the back face.
 - Back face fields: producer, writer, lead cast, second leads, synopsis.
 - This mirrors the kind of summary available per-drama on MDL, but entered/sourced independently — see Section 13 and Section 14 for sourcing constraints.
+- **Revised:** the detail is a bottom sheet rather than a card back-face flip, and it is reachable from every screen a drama appears on — a Discovery tile, a Your Picks row, a Calendar episode row, and a Currently Watching tile — not just Discovery. The drama's own controls (mark-watched, the episode slider, the star row, Drop) keep their existing behaviour; the tap-to-open target is everything else on the row/tile.
+- A drama with no synopsis on file (nothing sourceable under Section 14's rules, or a manually added entry) says so in the sheet rather than showing an empty summary. Detail fields carry over when an Interested pick is promoted into Currently Watching, so the sheet reads the same before and after promotion.
 
 ---
 

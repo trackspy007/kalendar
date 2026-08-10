@@ -527,6 +527,12 @@
   .ep-row .drama-name { font-size: 0.82rem; font-weight: 700; }
   .ep-row .ep-tag { font-size: 0.72rem; color: var(--ink-muted); }
   .ep-row .action { flex: 0 0 auto; }
+  /* Calendar rows and Watching titles open the same detail sheet a Discover
+     tile does, so they get the same tappable affordance. The row's own
+     Mark-watched button keeps its own cursor and is excluded in the handler. */
+  .ep-row[data-drama-id] { cursor: pointer; }
+  .ep-row[data-drama-id]:active { background: var(--highlight-soft); }
+  .ep-row[data-drama-id]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   .ep-btn {
     font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 0.32rem 0.65rem;
     border: 1px solid var(--border); background: var(--surface); cursor: pointer;
@@ -547,6 +553,8 @@
   .watch-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.3rem; }
   .watch-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
   .watch-title { font-family: var(--font-display); font-weight: 700; font-size: 0.94rem; }
+  .watch-title[data-drama-open] { cursor: pointer; }
+  .watch-title[data-drama-open]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
   .watch-badge-col { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; flex: 0 0 auto; }
   .caught-up-chip { font-size: 0.62rem; font-weight: 700; background: var(--positive-soft); color: var(--positive); padding: 0.12rem 0.45rem; border-radius: 999px; white-space: nowrap; }
   .behind-chip { font-size: 0.62rem; font-weight: 700; background: var(--amber-soft); color: var(--amber); padding: 0.12rem 0.45rem; border-radius: 999px; white-space: nowrap; }
@@ -1209,6 +1217,7 @@ var POSTER_DATA = {
           airing.push({
             id: rec.id, title: rec.title, network: rec.network, totalEps: rec.totalEps,
             airLabel: rec.airLabel, leads: rec.leads || [], secondLeads: rec.secondLeads || [],
+            synopsis: rec.synopsis || "", writer: rec.writer || "", director: rec.director || "", dateLabel: rec.dateLabel || "",
             themeIndex: rec.themeIndex, state: "watching", rating: null, notes: "",
             lastUpdated: Date.now(),
             episodes: rec.episodes.map(function (e) { return { num: e.num, date: new Date(e.date), watched: e.watched }; })
@@ -1261,6 +1270,7 @@ var POSTER_DATA = {
       return {
         id: dr.id, title: dr.title, network: dr.network, totalEps: dr.totalEps, airLabel: dr.airLabel,
         leads: dr.leads, secondLeads: dr.secondLeads, themeIndex: dr.themeIndex,
+        synopsis: dr.synopsis || "", writer: dr.writer || "", director: dr.director || "", dateLabel: dr.dateLabel || "",
         episodes: dr.episodes.map(function (e) { return { num: e.num, date: e.date.toISOString(), watched: e.watched }; })
       };
     });
@@ -1328,6 +1338,10 @@ var POSTER_DATA = {
       airing.push({
         id: it.id, title: it.title, network: it.network, totalEps: totalEps,
         airLabel: it.airLabel, leads: it.leads || [], secondLeads: it.secondLeads || [],
+        // synopsis/writer/director ride along so the detail sheet a Calendar
+        // or Watching tap opens shows the same thing it did in Discover —
+        // promotion used to drop them, leaving the sheet blank post-promote.
+        synopsis: it.synopsis || "", writer: it.writer || "", director: it.director || "", dateLabel: it.dateLabel || "",
         themeIndex: it.themeIndex, state: "watching", rating: null, notes: "",
         lastUpdated: Date.now(), episodes: episodes
       });
@@ -1439,12 +1453,17 @@ var POSTER_DATA = {
     var directorStr = it.director ? it.director : "Not yet announced";
     var epsLabel = it.totalEps ? (it.totalEps + " eps") : "eps TBD";
     var metaStr = [it.network, epsLabel, it.airLabel, it.dateLabel].filter(Boolean).join(" &middot; ");
+    // A drama reached from Calendar/Watching may have no synopsis on file —
+    // either it was seeded without one or no licensed source existed when it
+    // was added (see the sourcing rules in the spec). Say so plainly rather
+    // than rendering an empty paragraph.
+    var synopsisStr = it.synopsis ? it.synopsis : "No summary on file for this one yet.";
 
     return (
       '<div class="detail-content">' +
         '<div class="detail-title">' + it.title + "</div>" +
         '<div class="detail-meta">' + metaStr + "</div>" +
-        '<p class="synopsis">' + it.synopsis + "</p>" +
+        '<p class="synopsis">' + synopsisStr + "</p>" +
         "<h4>Writer</h4><p>" + writerStr + "</p>" +
         "<h4>Director</h4><p>" + directorStr + "</p>" +
         "<h4>Leads</h4><p>" + leadsStr + "</p>" +
@@ -1455,9 +1474,23 @@ var POSTER_DATA = {
 
   function showToast(id, status) {
     clearTimeout(toastTimer);
-    lastToastId = id;
-    var item = discoverItems.filter(function (x) { return x.id === id; })[0];
-    toastText.textContent = (status === "interested" ? "Interested — " : "Not interested — ") + item.title;
+    // A pick whose air date has already arrived is promoted into `airing` and
+    // spliced out of discoverItems by checkAutoPromotions before this runs, so
+    // the item has to be looked up in both places — the old discoverItems-only
+    // lookup threw on exactly those swipes, which killed the renderWatching /
+    // renderCalendar pass queued right after and left the newly promoted drama
+    // missing from both tabs until a reload.
+    var item = findDramaById(id);
+    if (!item) { lastToastId = null; toastEl.classList.remove("show"); return; }
+    // Undo only makes sense while the pick is still just a pick; once it has
+    // been promoted it owns episode state in Watching, so the toast reports
+    // where it went instead of offering a revert that wouldn't unwind that.
+    var promoted = discoverStatus[id] === "promoted";
+    lastToastId = promoted ? null : id;
+    toastUndo.style.display = promoted ? "none" : "";
+    toastText.textContent = promoted
+      ? "Added to Watching — " + item.title
+      : (status === "interested" ? "Interested — " : "Not interested — ") + item.title;
     toastEl.classList.add("show");
     toastTimer = setTimeout(function () {
       toastEl.classList.remove("show");
@@ -1486,11 +1519,21 @@ var POSTER_DATA = {
   // ---------- Drama detail sheet ----------
   // Opens when a tile is tapped (a stationary tap, not a drag). Shows the
   // same synopsis/writer/director/leads info that used to live on the back
-  // of the flipped card.
+  // of the flipped card. Reachable from Discover, Your Picks, the Calendar's
+  // episode rows and the Watching tiles — the same sheet in every case.
   var dramaDetailScreen = document.getElementById("drama-detail-screen");
   var dramaDetailBackdrop = document.getElementById("drama-detail-backdrop");
+  // Once a pick is promoted it's spliced out of discoverItems and lives in
+  // `airing` instead, so a Calendar/Watching tap has to look there too —
+  // a discoverItems-only lookup silently found nothing for exactly the
+  // dramas those two tabs show.
+  function findDramaById(id) {
+    return discoverItems.filter(function (x) { return x.id === id; })[0] ||
+      airing.filter(function (x) { return x.id === id; })[0] ||
+      null;
+  }
   function openDramaDetail(id) {
-    var it = discoverItems.filter(function (x) { return x.id === id; })[0];
+    var it = findDramaById(id);
     if (!it) return;
     document.getElementById("drama-detail-body").innerHTML = dramaDetailMarkup(it);
     dramaDetailScreen.classList.add("open");
@@ -2141,7 +2184,8 @@ var POSTER_DATA = {
           if (!aired) btn = '<span class="ep-btn upcoming">Upcoming</span>';
           else if (ep.watched) btn = '<button class="ep-btn watched" data-unmark="' + dr.id + ":" + ep.num + '" aria-label="Undo watched for ' + dr.title + " episode " + ep.num + '">' + ICON_CHECK + " Watched</button>";
           else btn = '<button class="ep-btn" data-mark="' + dr.id + ":" + ep.num + '">Mark watched</button>';
-          daysHtml += '<div class="ep-row">' + posterMarkup(dr.id, dr.title, dr.themeIndex, "mini-poster") +
+          daysHtml += '<div class="ep-row" data-drama-id="' + dr.id + '" role="button" tabindex="0" aria-label="View details for ' + dr.title + '">' +
+            posterMarkup(dr.id, dr.title, dr.themeIndex, "mini-poster") +
             '<div class="info"><div class="drama-name">' + dr.title + '</div><div class="ep-tag">Episode ' + ep.num + " of " + dr.totalEps + '</div></div>' +
             '<div class="action">' + btn + "</div></div>";
         });
@@ -2178,6 +2222,18 @@ var POSTER_DATA = {
       setEpisodeWatched(up[0], parseInt(up[1], 10), false);
       return;
     }
+    // Anywhere else on the row (poster, title, episode tag) opens the same
+    // detail sheet Discover uses — the mark/unmark buttons above already
+    // returned, so they never double-fire into the sheet.
+    var epRow = e.target.closest("[data-drama-id]");
+    if (epRow) openDramaDetail(epRow.getAttribute("data-drama-id"));
+  });
+  document.getElementById("calendar-days").addEventListener("keydown", function (e) {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var epRow = e.target.closest(".ep-row[data-drama-id]");
+    if (!epRow || e.target.closest("button")) return;
+    e.preventDefault();
+    openDramaDetail(epRow.getAttribute("data-drama-id"));
   });
 
   function setEpisodeWatched(dramaId, epNum, watched) {
@@ -2279,10 +2335,10 @@ var POSTER_DATA = {
         '<button class="next-ep-btn" data-next="' + dr.id + '" ' + (nextEp ? "" : "disabled") + ">" + (nextEp ? "Mark Ep " + nextEp.num + " watched" : "All aired episodes watched") + "</button>" +
         '<button class="drop-btn" data-drop="' + dr.id + '">Drop</button></div>';
 
-      html += '<div class="watch-tile">' +
+      html += '<div class="watch-tile" data-drama-id="' + dr.id + '">' +
         posterMarkup(dr.id, dr.title, dr.themeIndex) +
         '<div class="watch-body">' +
-          '<div class="watch-title-row"><span class="watch-title">' + dr.title + "</span>" +
+          '<div class="watch-title-row"><span class="watch-title" data-drama-open="' + dr.id + '" role="button" tabindex="0" aria-label="View details for ' + dr.title + '">' + dr.title + "</span>" +
           '<div class="watch-badge-col">' +
             '<span class="' + (behind > 0 ? "behind-chip" : "caught-up-chip") + '" data-behind-badge>' + (behind > 0 ? "Behind by " + behind : "Caught up") + "</span>" +
             '<span class="eps-total tabular">' + dr.totalEps + " eps</span>" +
@@ -2375,6 +2431,15 @@ var POSTER_DATA = {
     }
     var dropBtn = e.target.closest("[data-drop]");
     if (dropBtn) { dropDrama(dropBtn.getAttribute("data-drop")); return; }
+    // Tapping the tile itself (poster, title, chips, legend) opens the same
+    // detail sheet a Discover tile does. Every control the tile carries is
+    // excluded: the two buttons above already returned, and the slider and
+    // star row own their own gestures — the stars in particular open the
+    // rating sheet from their pointerup handler, and that click would
+    // otherwise land here too and stack a second sheet on top.
+    if (e.target.closest("button, input, .star-rating")) return;
+    var tile = e.target.closest("[data-drama-id]");
+    if (tile) openDramaDetail(tile.getAttribute("data-drama-id"));
   });
   // The star row on a Watching tile is display-only — too little width there
   // for precise per-star taps. Tapping it opens the rating/notes sheet
@@ -2409,9 +2474,18 @@ var POSTER_DATA = {
   document.getElementById("watch-list").addEventListener("keydown", function (e) {
     if (e.key !== "Enter" && e.key !== " ") return;
     var sr = e.target.closest(".star-rating[data-rating-for]");
-    if (!sr) return;
+    if (sr) {
+      e.preventDefault();
+      openRatingSheet(sr.getAttribute("data-rating-for"));
+      return;
+    }
+    // The title is the tile's keyboard entry point to the detail sheet —
+    // the tile as a whole can't be one focusable control, since it already
+    // contains a slider and several buttons of its own.
+    var titleEl = e.target.closest("[data-drama-open]");
+    if (!titleEl) return;
     e.preventDefault();
-    openRatingSheet(sr.getAttribute("data-rating-for"));
+    openDramaDetail(titleEl.getAttribute("data-drama-open"));
   });
 
   // ---------- FINALE ----------
