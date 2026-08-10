@@ -4,6 +4,20 @@ Running log of synthesized team decisions, maintained by the `chief-developer` a
 
 ---
 
+## 2026-08-10 — Paraphrased synopses allowed; every drama in the app now has one (user decision, not a full advocate/skeptic round)
+
+**Context:** wiring the detail sheet into Calendar and Watching (entry below) exposed that the seven seeded Watching dramas and eight Discovery entries had no synopsis at all, because Section 13's old rule allowed only Netflix newsroom prose or a Wikipedia article and otherwise required the field be left blank — "not even paraphrased" from MDL or DramaWiki. The user directed that the rule be relaxed so those shows get summaries.
+
+**What changed in the rules:** a drama's *premise* is a fact about the drama, not the property of whoever wrote it up first, so it may now be restated in KALENDAR's own words from MDL, DramaWiki, or press coverage. The verbatim ban is untouched and is now the entire rule: no copied sentences, and no lightly-reworded ones either — that is verbatim reuse in disguise, not paraphrase. Distinctive phrasings, coined nicknames, and a reviewer's own judgments stay with the source. Sections 13 and 14 both updated; the earlier "leave it blank/TBA" outcome survives only as the last resort when nothing describes a title yet.
+
+**What was written:** fifteen summaries — the seven Currently Watching seeds plus the eight Discovery entries that had an empty field. Each was researched first (Wikipedia, AsianWiki, Soompi, Dramabeans, MDL, network/streamer pages, trade press) and then written fresh in the one-to-two-sentence tile voice the existing entries already use. Nothing was invented: a title with no findable premise would have kept its blank field and the sheet's "no summary on file" line, which is still the behaviour for anything added later without a source.
+
+**Note for whoever picks this up next:** writer/director are still blank for most of these, so the sheet reads "Not yet announced" even for shows that have been airing for weeks. That's now the most visible remaining gap in the detail sheet — worth a pass with the same sourcing rules, since crew credits are structured facts and were never restricted in the first place.
+
+**Outcome:** Adopted. Spec updated — Sections 13 and 14.
+
+---
+
 ## 2026-08-10 — Drama detail sheet reachable from Calendar and Watching (direct user request, not a full advocate/skeptic round)
 
 **Context:** the user asked for the Discovery tap-to-see-the-summary behaviour on the Calendar's episode rows and the Currently Watching tiles as well. A direct feature request with no sourcing, licensing, or positioning question attached, so it was implemented rather than routed through a specialist round.
