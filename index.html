@@ -131,7 +131,13 @@
   /* Header */
   .app-header {
     flex: 0 0 auto;
-    padding: 1.1rem 1.25rem 0.9rem;
+    /* The page declares viewport-fit=cover with a translucent status bar, so
+       installed on a phone it draws *underneath* the clock and battery. The
+       tab bar already reserved the bottom inset; the top one was never
+       reserved, which is what put the wordmark behind the status bar. max()
+       rather than a plain sum so the roomy 1.1rem stays on anything with no
+       inset (desktop, browser tabs) instead of the two stacking up. */
+    padding: max(1.1rem, calc(env(safe-area-inset-top, 0px) + 0.45rem)) 1.25rem 0.9rem;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
     display: flex;
