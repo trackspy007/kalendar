@@ -4,6 +4,24 @@ Running log of synthesized team decisions, maintained by the `chief-developer` a
 
 ---
 
+## 2026-08-11 — Backup & restore added; the "app updates wipe my data" symptom diagnosed (direct user report, not a full advocate/skeptic round)
+
+**Context:** the user reported that every time the app was updated, everything they'd recorded in it was gone, and asked how to keep it.
+
+**Diagnosis (tested, not assumed):** the storage key `kalendar_proto_v1` has never changed, and state does survive an app update — verified by writing state, swapping in a modified `index.html`, reloading, and getting the same state back byte-for-byte. The wipe was an *origin* change, not a key change: `localStorage` is scoped per origin, and while the app was published as a Claude Artifact, each publish served it from a different sandboxed origin, so every update looked like a brand-new site with empty storage. Serving the identical file from a second origin reproduces the symptom exactly. Now that the app is on a fixed GitHub Pages URL, this specific cause is gone.
+
+**What was still true regardless:** browser storage is lossy in ways the app cannot prevent — cleared browsing data, iOS evicting storage for a site unopened for ~a week, and no path at all between the user's phone and laptop. So a fixed origin fixes the reported bug but is not a durable answer.
+
+**Built:** Backup & restore, reached from a header button (it belongs to the app as a whole, not to any one tab, and didn't warrant a tab slot). Export writes the storage key to a timestamped JSON file wrapped with an `app`/`format` header; import validates the file, confirms, replaces the key and reloads. Reload rather than in-place rehydration is deliberate — the in-memory arrays are built once at boot and mutated all session, so replaying a foreign state over them mid-session is the fragile option. Import accepts a bare state object as well as the wrapped format, so a copy pulled out of devtools still restores. `navigator.storage.persist()` is requested at startup as a best-effort hedge (Chrome honors it, Safari ignores it — which is exactly why it is a hedge and the export is the actual answer).
+
+**Also written into Section 12:** the two invariants this all rests on — the storage key never changes, and a drama's `id` is the join key for its entire history, so ids get retired rather than renamed.
+
+**Considered and not built:** cross-device sync. It needs somewhere server-side to put the data, which the app deliberately doesn't have (Section 15). Revisit only if the export file proves too manual in practice.
+
+**Outcome:** Adopted. Spec updated — Section 12.
+
+---
+
 ## 2026-08-10 — Paraphrased synopses allowed; every drama in the app now has one (user decision, not a full advocate/skeptic round)
 
 **Context:** wiring the detail sheet into Calendar and Watching (entry below) exposed that the seven seeded Watching dramas and eight Discovery entries had no synopsis at all, because Section 13's old rule allowed only Netflix newsroom prose or a Wikipedia article and otherwise required the field be left blank — "not even paraphrased" from MDL or DramaWiki. The user directed that the rule be relaxed so those shows get summaries.

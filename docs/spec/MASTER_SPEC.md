@@ -150,6 +150,13 @@ Entities and key fields only — not a schema/DDL.
 - **`CompletedRating`** — user, drama, rating (1–10), notes, top-10 rank (nullable)
 - **`ImportBatch` / `ImportRecord`** — source type, raw input, parsed status (audit trail for backfill imports)
 
+**Where this actually lives, in the shipped app (added 2026-08-10):** one `localStorage` key, `kalendar_proto_v1`, in one browser on one device. There is no account and no server (Section 15), so that key *is* the user's history. Two rules follow from it and are not optional:
+
+1. **The key never changes.** Renaming or versioning it silently orphans everything the user has recorded.
+2. **A drama's `id` is the join key** that watched-episode flags, ratings, notes and completion records all hang off. Renaming an `id` in the seed data orphans that drama's history just as effectively. Retire an entry rather than renaming it.
+
+Because browser storage is genuinely lossy — cleared browsing data wipes it, and iOS evicts storage for sites left unopened for roughly a week — the app carries **Backup & restore** (header button → sheet): export writes the key to a timestamped JSON file, import replaces it and reloads. This is also the only supported way to move a history between devices. `navigator.storage.persist()` is requested at startup as a best-effort hedge; Chrome honors it, Safari ignores it, which is precisely why the export exists and the persist call is not treated as the answer.
+
 ---
 
 ## 13. Data Sourcing Strategy

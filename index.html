@@ -134,7 +134,23 @@
     padding: 1.1rem 1.25rem 0.9rem;
     border-bottom: 1px solid var(--border);
     background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
   }
+  /* Backup lives in the header rather than in a tab: it belongs to the app as
+     a whole, not to any one screen, and it's a rare-but-important action that
+     shouldn't cost a tab slot. */
+  .header-btn {
+    flex: 0 0 auto;
+    background: var(--surface-2); border: none; cursor: pointer; color: var(--ink-muted);
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .header-btn svg { width: 17px; height: 17px; }
+  .header-btn:hover { color: var(--ink); }
+  .header-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   .wordmark {
     display: flex;
     flex-direction: column;
@@ -630,6 +646,31 @@
   }
   .drop-btn:hover { color: var(--accent); }
   .drop-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  /* Backup sheet */
+  .backup-section { padding: 0 0 1.1rem; }
+  .backup-section + .backup-section { border-top: 1px solid var(--border); padding-top: 1.1rem; }
+  .backup-section h4 {
+    font-family: var(--font-body); font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-muted);
+    margin: 0 0 0.35rem;
+  }
+  .backup-section p { margin: 0 0 0.7rem; font-size: 0.8rem; line-height: 1.45; color: var(--ink); }
+  .backup-btn {
+    font-size: 0.78rem; font-weight: 700;
+    background: var(--positive); color: var(--positive-ink);
+    border: none; border-radius: 999px; padding: 0.5rem 0.95rem; cursor: pointer;
+  }
+  .backup-btn.secondary { background: var(--surface-2); color: var(--ink); }
+  .backup-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .backup-stats {
+    font-size: 0.78rem; color: var(--ink-muted); line-height: 1.6;
+    background: var(--surface-2); border-radius: 10px; padding: 0.6rem 0.75rem; margin-bottom: 0.9rem;
+  }
+  .backup-note { font-size: 0.74rem; color: var(--ink-faint); line-height: 1.5; margin-top: 0.6rem; }
+  .backup-status { font-size: 0.78rem; font-weight: 600; margin-top: 0.6rem; min-height: 1.1rem; }
+  .backup-status.ok { color: var(--positive); }
+  .backup-status.err { color: var(--accent); }
+
   .complete-form { margin-top: 0.4rem; padding: 0.65rem; background: var(--surface-2); border-radius: 10px; display: flex; flex-direction: column; gap: 0.4rem; }
   #notes-eps-section { display: flex; flex-direction: column; gap: 0.4rem; }
   .complete-form label { font-size: 0.7rem; font-weight: 700; color: var(--ink-muted); }
@@ -722,6 +763,9 @@
       <span class="mark">K<em>alendar</em></span>
       <span class="tagline">your k-drama week, sorted</span>
     </div>
+    <button class="header-btn" id="backup-open" type="button" aria-label="Backup and restore">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/><path d="M12 4v11"/><path d="M8 11l4 4 4-4"/></svg>
+    </button>
   </header>
 
   <main class="panels">
@@ -806,6 +850,38 @@
       <span>Finale</span>
     </button>
   </nav>
+
+  <div class="sub-screen-backdrop" id="backup-backdrop"></div>
+  <div class="sub-screen" id="backup-screen">
+    <div class="sheet-handle"></div>
+    <div class="sub-screen-header">
+      <h2>Backup &amp; restore</h2>
+      <button class="back-btn" id="backup-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="sub-screen-body">
+      <div class="backup-stats" id="backup-stats"></div>
+      <div class="backup-section">
+        <h4>Save a copy</h4>
+        <p>Downloads everything above as a single file. Keep it somewhere that isn&rsquo;t this browser &mdash; that&rsquo;s the whole point of it.</p>
+        <button class="backup-btn" id="backup-export" type="button">Export backup</button>
+        <div class="backup-status" id="backup-export-status" role="status" aria-live="polite"></div>
+      </div>
+      <div class="backup-section">
+        <h4>Restore from a file</h4>
+        <p>Replaces everything currently in the app on this device with the contents of a backup file. Use it on a new phone, a new browser, or after clearing your data.</p>
+        <button class="backup-btn secondary" id="backup-import" type="button">Import backup&hellip;</button>
+        <input type="file" id="backup-file" accept="application/json,.json" hidden>
+        <div class="backup-status" id="backup-status" role="status" aria-live="polite"></div>
+      </div>
+      <div class="backup-section">
+        <h4>Where your data lives</h4>
+        <p>In this browser, on this device only. It is not on a server anywhere, so it doesn&rsquo;t follow you between your phone and your laptop.</p>
+        <p class="backup-note">Updates to the app don&rsquo;t touch it. Clearing your browsing data does erase it, and iPhones clear storage for sites you haven&rsquo;t opened in about a week &mdash; so if you go a while without using KALENDAR, export first.</p>
+      </div>
+    </div>
+  </div>
 
   <div class="sub-screen-backdrop" id="drama-detail-backdrop"></div>
   <div class="sub-screen" id="drama-detail-screen">
@@ -1545,6 +1621,136 @@ var POSTER_DATA = {
   }
   document.getElementById("drama-detail-close").addEventListener("click", closeDramaDetail);
   dramaDetailBackdrop.addEventListener("click", closeDramaDetail);
+
+  // ---------- Backup & restore ----------
+  // The app's entire memory is one localStorage key in one browser. That's
+  // fine right up until the browser forgets it (cleared data, or iOS evicting
+  // storage for a site left unopened for a week) or you pick up a different
+  // device — neither of which the app can prevent. Export writes that key out
+  // to a file; import puts it back. A plain file rather than a sync service
+  // because there's no backend here to sync against (Section 15).
+  var BACKUP_FORMAT = 1;
+  var backupScreen = document.getElementById("backup-screen");
+  var backupBackdrop = document.getElementById("backup-backdrop");
+  var backupFileInput = document.getElementById("backup-file");
+
+  function setBackupStatus(elId, message, kind) {
+    var el = document.getElementById(elId);
+    el.textContent = message;
+    el.className = "backup-status" + (kind ? " " + kind : "");
+  }
+
+  // Counts read off the live in-memory state, so what the sheet claims it's
+  // about to export is what's actually in the app right now.
+  function renderBackupStats() {
+    var watching = watchingDramas().length;
+    var completed = finale.filter(function (f) { return f.kind === "completed"; }).length;
+    var dropped = finale.filter(function (f) { return f.kind === "dropped"; }).length;
+    var swiped = discoverItems.filter(function (it) { return !!discoverStatus[it.id]; }).length;
+    var epsWatched = 0;
+    airing.forEach(function (dr) { epsWatched += dr.episodes.filter(function (e) { return e.watched; }).length; });
+    document.getElementById("backup-stats").innerHTML =
+      "<strong>" + watching + "</strong> in progress &middot; <strong>" + epsWatched + "</strong> episodes marked watched<br>" +
+      "<strong>" + completed + "</strong> completed &middot; <strong>" + dropped + "</strong> dropped &middot; <strong>" + swiped + "</strong> swiped in Discover";
+  }
+
+  function openBackup() {
+    renderBackupStats();
+    setBackupStatus("backup-export-status", "", "");
+    setBackupStatus("backup-status", "", "");
+    backupScreen.classList.add("open");
+    backupBackdrop.classList.add("open");
+  }
+  function closeBackup() {
+    backupScreen.classList.remove("open");
+    backupBackdrop.classList.remove("open");
+  }
+  document.getElementById("backup-open").addEventListener("click", openBackup);
+  document.getElementById("backup-close").addEventListener("click", closeBackup);
+  backupBackdrop.addEventListener("click", closeBackup);
+
+  function backupFilename() {
+    var n = new Date();
+    var pad = function (v) { return (v < 10 ? "0" : "") + v; };
+    return "kalendar-backup-" + n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate()) + ".json";
+  }
+
+  document.getElementById("backup-export").addEventListener("click", function () {
+    // Flush in-memory state first: a slider drag or rating made seconds ago
+    // is already saved, but this costs nothing and removes the question.
+    saveState();
+    var payload = {
+      app: "kalendar",
+      format: BACKUP_FORMAT,
+      exportedAt: new Date().toISOString(),
+      state: JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}")
+    };
+    var name = backupFilename();
+    try {
+      var blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      setBackupStatus("backup-export-status", "Saved as " + name, "ok");
+    } catch (err) {
+      setBackupStatus("backup-export-status", "Couldn't save the file on this browser.", "err");
+    }
+  });
+
+  // Accepts either the wrapped export format or a bare state object, so a
+  // copy someone pulled straight out of devtools still restores.
+  function stateFromBackup(parsed) {
+    if (!parsed || typeof parsed !== "object") return null;
+    var state = (parsed.state && typeof parsed.state === "object") ? parsed.state : parsed;
+    var known = ["discoverStatus", "watched", "airingState", "airingRating", "finale", "airingExtra"];
+    var recognized = known.some(function (k) { return Object.prototype.hasOwnProperty.call(state, k); });
+    return recognized ? state : null;
+  }
+  function describeBackup(state) {
+    var fin = Array.isArray(state.finale) ? state.finale : [];
+    var completed = fin.filter(function (f) { return f.kind === "completed"; }).length;
+    var dropped = fin.filter(function (f) { return f.kind === "dropped"; }).length;
+    var tracked = state.watched ? Object.keys(state.watched).length : 0;
+    return tracked + (tracked === 1 ? " drama" : " dramas") + " in progress, " + completed + " completed, " + dropped + " dropped";
+  }
+
+  document.getElementById("backup-import").addEventListener("click", function () {
+    backupFileInput.click();
+  });
+  backupFileInput.addEventListener("change", function () {
+    var file = backupFileInput.files && backupFileInput.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onerror = function () {
+      backupFileInput.value = "";
+      setBackupStatus("backup-status", "Couldn't read that file.", "err");
+    };
+    reader.onload = function () {
+      var state = null;
+      try { state = stateFromBackup(JSON.parse(reader.result)); } catch (err) { state = null; }
+      backupFileInput.value = "";
+      if (!state) {
+        setBackupStatus("backup-status", "That doesn't look like a KALENDAR backup.", "err");
+        return;
+      }
+      if (!window.confirm("Restore " + describeBackup(state) + "?\n\nThis replaces everything currently in the app on this device.")) {
+        setBackupStatus("backup-status", "Restore cancelled — nothing changed.", "");
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // Reload rather than re-hydrate in place. The in-memory arrays are built
+      // once at boot and then mutated all session (episodes generated, finale
+      // merged, picks promoted); replaying a different saved state over them
+      // mid-session is far more fragile than just starting clean from it.
+      location.reload();
+    };
+    reader.readAsText(file);
+  });
 
   // ---------- Your Picks sheet (Interested / Not Interested) ----------
   // Opens and closes only on explicit tap — the pill, the close button, or
@@ -2772,6 +2978,14 @@ var POSTER_DATA = {
   });
 
   // ---------- init ----------
+  // Ask the browser to mark this site's storage as persistent, so it isn't
+  // among the first things evicted when space runs low. Chrome grants it
+  // silently once a site looks used; Safari ignores it entirely, which is
+  // exactly why the export in Backup & restore exists rather than this being
+  // the whole answer. Best-effort — never block startup on it.
+  if (navigator.storage && navigator.storage.persist) {
+    try { navigator.storage.persist().catch(function () {}); } catch (e) {}
+  }
   loadState();
   repairOrphanedAiringStates();
   checkAutoPromotions();
