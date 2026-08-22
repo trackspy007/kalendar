@@ -1248,7 +1248,7 @@ var POSTER_DATA = {
     { id: "remarried-empress", title: "The Remarried Empress", network: "Disney+", totalEps: 10, dateLabel: "October 2026", sortDate: d(2026, 10, 15), airLabel: "Weekly", synopsis: "Exiled after a bitter divorce, an empress gets an impossible second chance at power, love, and a life entirely on her own terms.", leads: ["Shin Min-a", "Ju Ji-hoon", "Lee Jong-suk", "Lee Se-young"], secondLeads: [], writer: "Yeo Ji-na, Hyun Choong-yeol", director: "Jo Soo-won", themeIndex: 2 },
     { id: "love-in-disguise", title: "Love in Disguise", network: "tvN", totalEps: 12, dateLabel: "October 2026", sortDate: d(2026, 10, 19), airLabel: "Mon / Tue · 8:50 PM KST", synopsis: "A chaebol heir under suspicion for his own secretary's murder unknowingly hires his new bodyguard-secretary — a former special-forces officer working undercover to investigate him.", leads: ["Im Si-wan", "Seol In-ah"], secondLeads: ["Kim Jung-hyun", "Yeon Woo"], writer: "", director: "", themeIndex: 5 },
     { id: "love-oclock", title: "Love O'Clock", network: "Netflix", totalEps: null, dateLabel: "March 2027", sortDate: d(2027, 3, 15), airLabel: "All episodes at once", synopsis: "Two coworkers who can't stand each other start swapping bodies for exactly one hour a day — with no idea why, or how to stop it.", leads: ["Shin Hye-sun", "Na In-woo"], secondLeads: ["Yoon Kyun-sang", "Lee Ju-woo"], writer: "Han Sul-hee, Hong Bo-hui", director: "Kim Sang-hyup", themeIndex: 4 },
-    { id: "my-bias-my-boss", title: "My Bias, My Boss", network: "tvN", totalEps: 12, dateLabel: "Aug 3, 2026", sortDate: d(2026, 8, 3), airLabel: "Weekly", synopsis: "A rookie lands a job at the fashion platform tied to the idol-turned-actor she has adored for years — and gets a workaholic CEO, a secret the two men share, and no idea which of them she's falling for.", leads: ["Kang Hoon", "Kim Hye-joon"], secondLeads: ["Cha Woo-min"], writer: "", director: "", themeIndex: 0 },
+    { id: "my-bias-my-boss", title: "My Bias, My Boss", network: "tvN", totalEps: 12, dateLabel: "Aug 3, 2026", sortDate: d(2026, 8, 3), airLabel: "Mon / Tue · 8:50 PM KST", synopsis: "A rookie lands a job at the fashion platform tied to the idol-turned-actor she has adored for years — and gets a workaholic CEO, a secret the two men share, and no idea which of them she's falling for.", leads: ["Kang Hoon", "Kim Hye-joon"], secondLeads: ["Cha Woo-min"], writer: "Lee Young", director: "Park Ji-hyun", themeIndex: 0 },
     { id: "flex-x-cop-2", title: "Flex X Cop Season 2", network: "SBS", totalEps: 14, dateLabel: "Aug 7, 2026", sortDate: d(2026, 8, 7), airLabel: "Weekly", synopsis: "The chaebol heir who fell into detective work by accident comes back from the police academy a properly badged cop — reporting to the merciless instructor who put him through it.", leads: ["Ahn Bo-hyun", "Jung Eun-chae"], secondLeads: [], writer: "", director: "", themeIndex: 1 },
     { id: "a-trap-called-desire", title: "A Trap Called Desire", network: "KBS2", totalEps: 100, dateLabel: "Aug 10, 2026", sortDate: d(2026, 8, 10), airLabel: "Weekdays", synopsis: "Framed for a murder she didn't commit, a young woman loses everything overnight and works her way back toward the polished foundation executive who set the trap.", leads: ["Jang Seo-hee", "Jun Hye-won"], secondLeads: ["Sul Jung-hwan", "Joo Sae-byuk", "Jang Se-hyun"], writer: "", director: "", themeIndex: 2 },
     { id: "ok-lets-get-divorced", title: "OK! Let's Get Divorced", network: "KBS2", totalEps: 12, dateLabel: "Aug 19, 2026", sortDate: d(2026, 8, 19), airLabel: "Weekly", synopsis: "A wedding-dress-shop CEO and her designer co-founder husband navigate divorce after years of marriage, per Soompi's script-reading coverage.", leads: ["Lee Min-jung", "Kim Ji-suk"], secondLeads: [], writer: "", director: "Joo Sung-woo", themeIndex: 3 },
@@ -1377,6 +1377,42 @@ var POSTER_DATA = {
     if (changed) saveState();
   }
 
+  // ---------- repair: re-sync a promoted show's dates with a corrected schedule ----------
+  // A promotion freezes the generated episode grid into saved state, so a
+  // catalog record that was wrong when it was promoted stays wrong in that
+  // browser forever — fixing the seed data here does nothing for anyone who
+  // already picked the show up. (Real case: "My Bias, My Boss" shipped with a
+  // bare "Weekly" airLabel, which parseAirDays reads as one episode a week on
+  // the premiere's weekday, so a Mon/Tue show ran at half speed and its
+  // numbering drifted two behind the real broadcast.) Rebuild the grid from
+  // the catalog whenever it now disagrees, carrying watched flags across by
+  // episode number rather than by position. Manually added dramas have no
+  // catalog entry and are left alone.
+  function repairPromotedSchedules() {
+    var catalog = {};
+    currentlyAiring.concat(upcoming).concat(tba).forEach(function (it) { catalog[it.id] = it; });
+    var changed = false;
+    airing.forEach(function (dr) {
+      if (STATIC_AIRING_IDS.indexOf(dr.id) !== -1) return;
+      var it = catalog[dr.id];
+      if (!it || (!it.airingBucket && !it.sortDate)) return;
+      var fresh = catalogEpisodes(it);
+      var same = fresh.length === dr.episodes.length && fresh.every(function (ep, i) {
+        return sameDay(ep.date, dr.episodes[i].date);
+      });
+      if (same) return;
+      var watchedByNum = {};
+      dr.episodes.forEach(function (ep) { if (ep.watched) watchedByNum[ep.num] = true; });
+      dr.episodes = fresh.map(function (ep) {
+        return { num: ep.num, date: ep.date, watched: !!watchedByNum[ep.num] };
+      });
+      dr.airLabel = it.airLabel;
+      dr.totalEps = it.totalEps || dr.totalEps;
+      changed = true;
+    });
+    if (changed) saveState();
+  }
+
   // ---------- auto-promotion: Interested -> Watching once a show airs ----------
   // "upcoming" items only carry a human-readable airLabel ("Fri / Sat ·
   // 9:50 PM KST"), not a structured schedule, so promoting one into the
@@ -1402,6 +1438,14 @@ var POSTER_DATA = {
     }
     return genEpisodes(it.sortDate, parseAirDays(it.airLabel, it.sortDate), totalEps);
   }
+  // The one place that turns a catalog record into an episode grid, so a
+  // promotion and a later schedule repair can never disagree about what a
+  // show's dates should be.
+  function catalogEpisodes(it) {
+    return it.airingBucket
+      ? genEpisodes(it.start, it.airDays, it.totalEps || 16)
+      : buildPromotionEpisodes(it);
+  }
   // Run after anything that can change discoverStatus (a swipe, a move in
   // Your Picks, or just a fresh page load with an old "interested" pick
   // whose date has since arrived). Idempotent — marks each promoted id
@@ -1416,7 +1460,7 @@ var POSTER_DATA = {
     if (!candidates.length) return;
     candidates.forEach(function (it) {
       var totalEps = it.totalEps || 16;
-      var episodes = it.airingBucket ? genEpisodes(it.start, it.airDays, totalEps) : buildPromotionEpisodes(it);
+      var episodes = catalogEpisodes(it);
       airing.push({
         id: it.id, title: it.title, network: it.network, totalEps: totalEps,
         airLabel: it.airLabel, leads: it.leads || [], secondLeads: it.secondLeads || [],
@@ -2994,6 +3038,7 @@ var POSTER_DATA = {
   }
   loadState();
   repairOrphanedAiringStates();
+  repairPromotedSchedules();
   checkAutoPromotions();
   renderDiscover();
   renderCalendar();
