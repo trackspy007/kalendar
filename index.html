@@ -113,7 +113,13 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    /* clip, not hidden: `hidden` still leaves the shell programmatically
+       scrollable, which is how a scrollIntoView call was able to slide the
+       whole app up and reveal the parked sheets. `clip` isn't a scroll
+       container at all. `hidden` stays first as the fallback for Safari 15
+       and older, which ignores the `clip` line. */
     overflow: hidden;
+    overflow: clip;
   }
   @media (min-width: 481px) {
     body { padding: 2.5rem 1rem; align-items: flex-start; }
@@ -125,6 +131,7 @@
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
       overflow: hidden;
+      overflow: clip;
     }
   }
 
@@ -2411,7 +2418,18 @@ var POSTER_DATA = {
     var btn = e.target.closest("button[data-day]");
     if (!btn) return;
     var target = document.getElementById("day-" + btn.getAttribute("data-day"));
-    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!target) return;
+    // Scroll the calendar panel explicitly rather than calling
+    // target.scrollIntoView(): that walks *every* scrollable ancestor, and
+    // `.app` is programmatically scrollable even though `overflow: hidden`
+    // stops the user from scrolling it by hand. The closed sheets park below
+    // the app on a translateY(100%), which counts toward its scrollable
+    // overflow — so scrolling `.app` slid the whole chrome up and dragged an
+    // empty, never-opened detail sheet into view, looking for all the world
+    // like tapping a date had opened a blank Details page.
+    var panel = document.getElementById("panel-calendar");
+    var offset = target.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+    panel.scrollTo({ top: panel.scrollTop + offset, behavior: "smooth" });
   });
   document.getElementById("week-prev").addEventListener("click", function () {
     weekOffset -= 1;
@@ -2982,6 +3000,19 @@ var POSTER_DATA = {
       document.getElementById("panel-" + btn.getAttribute("data-tab")).classList.add("active");
     });
   });
+
+  // Last line of defence for Safari 15 and older, which ignores the
+  // `overflow: clip` above and leaves the shell scrollable: if anything ever
+  // scrolls the app shell, put it straight back. The shell is chrome — only
+  // the panels inside it are meant to scroll. On browsers that honour `clip`
+  // this never fires, because a clipped box emits no scroll events.
+  (function () {
+    var appEl = document.getElementById("app");
+    appEl.addEventListener("scroll", function () {
+      if (appEl.scrollTop !== 0) appEl.scrollTop = 0;
+      if (appEl.scrollLeft !== 0) appEl.scrollLeft = 0;
+    });
+  })();
 
   // ---------- init ----------
   // Ask the browser to mark this site's storage as persistent, so it isn't
