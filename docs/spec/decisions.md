@@ -4,6 +4,22 @@ Running log of synthesized team decisions, maintained by the `chief-developer` a
 
 ---
 
+## 2026-09-10 — Korean titles added to every catalog entry; the weekly ingest now matches on hangul (user decision, not a full advocate/skeptic round)
+
+**Context:** the weekly research pull flagged that the TBA entry *Love Doctor* and DramaWiki's newly dated *Between Steps* were the same drama — caught only because MyDramaList's URL slug for it was still `love-doctor`. *Mom's Crazy* → *Mission: Mompossible* was a second instance in the same window. English titles are not stable between announcement and air, so matching new candidates against the catalog by English title will keep producing duplicate entries for shows already tracked.
+
+**The `id` rule got in the way, and was over-read.** Section 12's "ids get retired rather than renamed" invariant (added 2026-08-10 alongside Backup & restore) was applied to the *displayed title* as well, leaving the entry reading "Love Doctor" after the show had been retitled. The user pushed back: the English title is the name a streamer lists and the name they search for, so it must track reality. The invariant only ever concerned the `id` — the internal localStorage join key, which is never rendered. Section 12 now says so explicitly.
+
+**What was built:** a `titleKr` field on every entry in `airing`, `upcoming`, `tba`, `currentlyAiring` and `MY_FINALE_BACKFILL` (98 entries, none blank), rendered under the English title in the detail sheet and carried through all five places entry fields get copied — promotion, save, reload, complete and drop — so it survives a drama's whole lifecycle. Hangul for the 43 current/upcoming entries came from DramaWiki's index column and MyDramaList's `native_title`; the 55 completed backfill entries were filled from the same sources.
+
+**Sourcing note:** `native_title` on MyDramaList's `/api/id/{slug}` is a structured fact, not authored prose, so it falls under the "structured facts were always fine to pull" half of Section 14 and is unaffected by the verbatim-prose ban.
+
+**Not done:** the `library` array (73 entries — the separate add-a-drama search index of already-aired shows) has no `titleKr`. Its job is user-facing search over shows the user already knows the name of, not cross-source reconciliation, so it does not need one yet.
+
+**Outcome:** Adopted. Spec updated — Sections 12 and 13.
+
+---
+
 ## 2026-08-11 — Backup & restore added; the "app updates wipe my data" symptom diagnosed (direct user report, not a full advocate/skeptic round)
 
 **Context:** the user reported that every time the app was updated, everything they'd recorded in it was gone, and asked how to keep it.

@@ -143,7 +143,7 @@ Validation/dedup strategy for bulk backfill (matching pasted/entered titles agai
 
 Entities and key fields only — not a schema/DDL.
 
-- **`Drama`** — title, poster, episode count, air days, channel, start date, synopsis, cast, crew, status (upcoming / airing / ended)
+- **`Drama`** — title (English), Korean title, poster, episode count, air days, channel, start date, synopsis, cast, crew, status (upcoming / airing / ended)
 - **`UserDramaStatus`** — user ↔ drama, state enum (interested / currently-watching / completed / dropped / not-interested), timestamps
 - **`Episode`** — drama reference, episode number, air date
 - **`EpisodeWatchRecord`** — user, episode reference, watched (boolean), watched date
@@ -154,6 +154,10 @@ Entities and key fields only — not a schema/DDL.
 
 1. **The key never changes.** Renaming or versioning it silently orphans everything the user has recorded.
 2. **A drama's `id` is the join key** that watched-episode flags, ratings, notes and completion records all hang off. Renaming an `id` in the seed data orphans that drama's history just as effectively. Retire an entry rather than renaming it.
+
+**The `id` rule is about the key, not the name (clarified 2026-09-10).** `id` is internal and never rendered — the user never sees it. The displayed English `title` is free to change and *should* change whenever the real title does, because that is the name the streamer will list it under and the name the user searches for. These come apart routinely: a drama announced as *Love Doctor* aired as *Between Steps* on the same `love-doctor` id. So an English retitle is a `title` edit, never an `id` edit.
+
+3. **`titleKr` is the stable human-facing identifier (added 2026-09-10).** Korean titles effectively never change between announcement and air, while English ones do. Every catalog entry carries one, it renders under the English title in the detail sheet so the user can recognize a show whose English name has shifted, and it is what the weekly ingest matches on (Section 13).
 
 Because browser storage is genuinely lossy — cleared browsing data wipes it, and iOS evicts storage for sites left unopened for roughly a week — the app carries **Backup & restore** (header button → sheet): export writes the key to a timestamped JSON file, import replaces it and reloads. This is also the only supported way to move a history between devices. `navigator.storage.persist()` is requested at startup as a best-effort hedge; Chrome honors it, Safari ignores it, which is precisely why the export exists and the persist call is not treated as the answer.
 
@@ -176,6 +180,8 @@ Because browser storage is genuinely lossy — cleared browsing data wipes it, a
 **Not adopted as named sources (parked — see Section 17):** direct scraping of Korean broadcaster schedule pages (SBS, MBC, KBS, tvN, ENA) or Netflix's own site raises the same "unauthorized automated extraction" shape of concern already flagged for MDL, and none of these have had per-site ToS reviewed. Not ruled in or out.
 
 **Resolved (cadence, revised 2026-07-31):** ~~fully manual for v1~~ — automated via a **recurring scheduled Claude Code task** (cadence set at the scheduling tool's own setup, not fixed in this spec). On its schedule, the task fetches all active sources above, cross-references against the app's existing drama data to avoid duplicates, and drafts normalized `Drama`/`Episode` entries. **This is scheduled, cron-driven automation of the pull + draft step — not a passive background service**, since the app has no backend to run one on (see Section 15 on architecture); it is Claude Code's own scheduling capability standing in for that missing backend.
+
+**Match on the Korean title, not the English one (added 2026-09-10).** When the scheduled pull cross-references a candidate against the existing catalog, the hangul title is the join — not fuzzy English string matching. English titles are renamed between announcement and premiere often enough to break naive matching: *Love Doctor* → *Between Steps* (연애박사) and *Mom's Crazy* → *Mission: Mompossible* (엄마가 미쳤어요) both happened inside a three-week window, and the first was only caught because MyDramaList's URL slug still said `love-doctor`. DramaWiki's index carries hangul per row, and MyDramaList's `/api/id/{slug}` returns it as `native_title`; either is a fine source. On a hangul match against an existing entry, update that entry in place — correct its date, and update its English `title` if the title itself changed — rather than adding a second entry for the same show.
 
 Two distinct gates remain, not one: (1) a lightweight data-quality check — the drafted batch is shown to the user before anything touches the live app, catching obviously wrong/duplicate/malformed pulls, not a preference judgment; (2) the actual interested/not-interested decision, which happens exactly like it always has — once a candidate is a live Discover tile, the existing swipe-right/swipe-left gesture **is** that decision. No separate curator/admin screen exists or is planned; gate (2) is just the ordinary Discover UI.
 
