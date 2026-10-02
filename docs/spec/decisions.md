@@ -4,6 +4,22 @@ Running log of synthesized team decisions, maintained by the `chief-developer` a
 
 ---
 
+## 2026-10-02 — Posters hotlink again, with a placeholder fallback; 37 embedded blobs dropped (user decision, not a full advocate/skeptic round)
+
+**Context:** `index.html` had reached 5.87 MB, of which 4.9 MB was base64 poster data, and it grows roughly 20 KB per title the weekly ingest adds. Section 14 said hotlinking was impossible, but that finding was made on 2026-07-31 while the app was published as a Claude Artifact, whose CSP blocked remote images. The app has since moved to its own GitHub Pages origin and sets no CSP of its own, so the premise no longer held.
+
+**Tested rather than assumed.** `i.mydramalist.com` returns HTTP 200 for any referrer — none, the app's own origin, and an unrelated third party — with `access-control-allow-origin: *` and a one-year Cloudflare `cache-control`. There is no hotlink protection. Separately, the exact markup and CSS were verified in a headless browser against a locally served image: a good URL renders, and a deliberately broken one is removed by `onerror`, uncovering the themed placeholder beneath.
+
+**What was built:** `posterMarkup()` now prefers `POSTER_DATA`, falls back to `POSTER_SOURCE`, and renders an `<img>` layered over the placeholder instead of a CSS `background-image` — a background has no error event, so it cannot degrade. `loading="lazy"` keeps 61 tiles from fetching at once. The 37 blobs that have a `POSTER_SOURCE` URL were dropped; 5.69 → 4.89 MB.
+
+**Why only 37 of 115.** The other 78 blobs predate `POSTER_SOURCE` and have no URL recorded, so dropping them would simply delete those posters. Of those, 26 are catalog entries and 51 belong to the `library` add-a-drama index. Recovering their URLs is a MyDramaList lookup pass per title and was left for a separate, deliberate step rather than bundled in here.
+
+**Known limit on the verification:** the end-to-end leg — a real browser loading an MDL image from the app — could not be confirmed from the scheduled-pull container, whose headless Chromium rejects the egress proxy's CA with `ERR_CERT_AUTHORITY_INVALID`. Disabling TLS verification to force it was declined. The risk this leaves is bounded: if the images do not load on a real device, those 37 tiles show the same placeholder they showed before the posters were ever embedded, and the blobs remain in git history at `b3a4e11` for a one-commit revert.
+
+**Outcome:** Adopted. Spec updated — Section 14.
+
+---
+
 ## 2026-09-10 — Korean titles added to every catalog entry; the weekly ingest now matches on hangul (user decision, not a full advocate/skeptic round)
 
 **Context:** the weekly research pull flagged that the TBA entry *Love Doctor* and DramaWiki's newly dated *Between Steps* were the same drama — caught only because MyDramaList's URL slug for it was still `love-doctor`. *Mom's Crazy* → *Mission: Mompossible* was a second instance in the same window. English titles are not stable between announcement and air, so matching new candidates against the catalog by English title will keep producing duplicate entries for shows already tracked.
