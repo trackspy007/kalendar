@@ -4,6 +4,20 @@ Running log of synthesized team decisions, maintained by the `chief-developer` a
 
 ---
 
+## 2026-10-30 — The weekly ingest applies factual updates itself; only new entries and synopses are held (user decision, not a full advocate/skeptic round)
+
+**What went wrong.** The weekly pull reported its findings and asked for approval every time, including for things like a corrected air date or a refreshed poster. Four runs in a row did this. Nothing was wrong with any individual report, but the approval step was a single point of failure, and when notifications stopped arriving the user saw no runs after 8/23 while three weeks of corrections sat unapplied and the app showed stale data. The failure was not that the gate was too strict; it was that the gate applied to changes that never needed one, and that the held items lived only in chat messages with no durable home.
+
+**The new gate, as the user set it.** Low-risk factual updates — dates, episode counts, cast, air labels, retitles confirmed on a hangul match, poster refreshes — are applied and pushed by the run itself. Two things are still held for review: **new catalog entries** and **synopsis text**. New entries because an entry is a commitment to a join key; synopses because they are written prose and have a copyright constraint behind them (Section 14).
+
+**Held items now live in the repo,** at `docs/spec/pending-review.md`, which every run rewrites: it adds what it found, removes what has been accepted, and updates the date line. The push notification names the file. A missed notification now costs a week's visibility, not the record itself.
+
+**Why it is safe to let the run write.** The factual edits all go through a scoped, id-anchored replacement that asserts the old value before writing and refuses the whole batch on any mismatch — it has already caught two near-misses (a shared air date, a differently-formatted cast array). Separately, `repairPromotedSchedules()` rebuilds already-promoted episode grids when the catalog changes and carries watched flags across by episode number, so a corrected `airLabel` or date self-heals rather than stranding the user's progress.
+
+**Outcome:** Adopted. Spec updated — Section 13. First batch under the new gate: `9f3292e`, 28 scoped factual edits, zero mismatches.
+
+---
+
 ## 2026-10-02 — Posters hotlink again, with a placeholder fallback; 37 embedded blobs dropped (user decision, not a full advocate/skeptic round)
 
 **Context:** `index.html` had reached 5.87 MB, of which 4.9 MB was base64 poster data, and it grows roughly 20 KB per title the weekly ingest adds. Section 14 said hotlinking was impossible, but that finding was made on 2026-07-31 while the app was published as a Claude Artifact, whose CSP blocked remote images. The app has since moved to its own GitHub Pages origin and sets no CSP of its own, so the premise no longer held.
