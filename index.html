@@ -1338,7 +1338,7 @@ var POSTER_SOURCE = {
     { id: "your-personal-taxi", title: "Your Personal Taxi", titleKr: "개인적인 택시", network: "Netflix", totalEps: 8, dateLabel: "Oct 1, 2026", sortDate: d(2026, 10, 1), airLabel: "All episodes at once", synopsis: "", leads: ["Lee Yeon-hee", "Cha Tae-hyun"], secondLeads: ["Hyun Bong-shik", "Ye Ji-won"], writer: "", director: "", themeIndex: 2 },
     { id: "kidnap-game", title: "KiDnap GAME", titleKr: "키드냅 게임", network: "Channel A", totalEps: 11, dateLabel: "Oct 6, 2026", sortDate: d(2026, 10, 6), airLabel: "Weekly", synopsis: "", leads: ["Lee Joon-gi", "Sakaguchi Kentaro"], secondLeads: ["Alice Ko", "Carrie Wong"], writer: "", director: "", themeIndex: 3 },
     { id: "take-charge-of-my-heart", title: "Take Charge of My Heart", titleKr: "나를 충전해줘", network: "Netflix", totalEps: 10, dateLabel: "Oct 9, 2026", sortDate: d(2026, 10, 9), airLabel: "All episodes at once", synopsis: "His artificial heart is running down, and the one person who can recharge it never asked to be responsible for keeping a stranger alive.", leads: ["Kim Young-kwang", "Chae Soo-bin"], secondLeads: ["Cha Woo-min"], writer: "", director: "", themeIndex: 4 },
-    { id: "make-me-tingle", title: "Make Me Tingle", titleKr: "내가 떨릴 수 있게", network: "TVING", totalEps: 10, dateLabel: "Oct 15, 2026", sortDate: d(2026, 10, 15), airLabel: "Thu", synopsis: "A woman who has stopped believing love means anything in particular keeps colliding with a cafe owner who feels everything far too much.", leads: ["Nam Ji-hyun", "Kim Jae-young"], secondLeads: ["Kang Tae-joo"], writer: "", director: "", themeIndex: 5 },
+    { id: "make-me-tingle", title: "Make Me Tingle", titleKr: "내가 떨릴 수 있게", network: "TVING", totalEps: 10, dateLabel: "Oct 15, 2026", sortDate: d(2026, 10, 15), airLabel: "4 eps, then 2 every Thu", dropSizes: [4, 2], synopsis: "A woman who has stopped believing love means anything in particular keeps colliding with a cafe owner who feels everything far too much.", leads: ["Nam Ji-hyun", "Kim Jae-young"], secondLeads: ["Kang Tae-joo"], writer: "", director: "", themeIndex: 5 },
     { id: "final-table", title: "Final Table", titleKr: "파이널 테이블", network: "JTBC", totalEps: 12, dateLabel: "Oct 24, 2026", sortDate: d(2026, 10, 24), airLabel: "Sat / Sun", synopsis: "Chefs from around the world converge on one Korean competition kitchen, where a seat at the table is worth more to some teams than others — one of them is cooking to keep its restaurant open.", leads: ["Ahn Hyo-seop", "Hong Hwa-yun"], secondLeads: ["Jang Ryool", "Jung Yoo-jin"], writer: "", director: "", themeIndex: 0 },
     { id: "its-you-regardless", title: "Oh! My Guard", titleKr: "밑도 끝도 없이, 너다", network: "Lifetime", totalEps: 16, dateLabel: "Oct 24, 2026", sortDate: d(2026, 10, 24), airLabel: "Weekly", synopsis: "A top star is hiding the one flaw that could end his career, and the woman who collides with him decides she has been cast as the leading lady of whatever story he is living.", leads: ["Jung Yong-hwa", "Hong Seung-hee"], secondLeads: ["Lee Yi-kyung", "Park Yoo-na", "Han Chae-ah"], writer: "", director: "", themeIndex: 1 },
     { id: "dead-end-job", title: "Dead-End Job", titleKr: "꿀알바", network: "Netflix", totalEps: 8, dateLabel: "Oct 30, 2026", sortDate: d(2026, 10, 30), airLabel: "All episodes at once", synopsis: "An employment agency is handing out part-time work that pays far too well for what it asks, and the catch only becomes clear once you have taken the shift.", leads: ["Lee Jae-wook", "Go Min-shi"], secondLeads: ["Kim Min-ha", "Lee Hee-joon"], writer: "", director: "", themeIndex: 2 },
@@ -1557,7 +1557,31 @@ var POSTER_SOURCE = {
       for (var i = 1; i <= totalEps; i++) eps.push({ num: i, date: new Date(it.sortDate.getTime()), watched: false });
       return eps;
     }
-    return genEpisodes(it.sortDate, parseAirDays(it.airLabel, it.sortDate), totalEps);
+    var days = parseAirDays(it.airLabel, it.sortDate);
+    if (it.dropSizes && it.dropSizes.length) return genBatchedEpisodes(it.sortDate, days, totalEps, it.dropSizes);
+    return genEpisodes(it.sortDate, days, totalEps);
+  }
+  // Batched weekly drops (e.g. Make Me Tingle: 4 on premiere day, then 2
+  // every Thursday). dropSizes[i] is how many episodes land on the i-th air
+  // day; the last entry repeats until totalEps is reached. A one-per-day
+  // schedule is just dropSizes [1], so this never changes a show without it.
+  function genBatchedEpisodes(startDate, airDays, total, dropSizes) {
+    var eps = [];
+    var cur = new Date(startDate.getTime());
+    var drop = 0;
+    var guard = 0;
+    while (eps.length < total && guard < 400) {
+      if (airDays.indexOf(cur.getDay()) !== -1) {
+        var size = dropSizes[Math.min(drop, dropSizes.length - 1)];
+        for (var k = 0; k < size && eps.length < total; k++) {
+          eps.push({ num: eps.length + 1, date: new Date(cur.getTime()), watched: false });
+        }
+        drop++;
+      }
+      cur.setDate(cur.getDate() + 1);
+      guard++;
+    }
+    return eps;
   }
   // The one place that turns a catalog record into an episode grid, so a
   // promotion and a later schedule repair can never disagree about what a
