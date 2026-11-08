@@ -4,13 +4,25 @@ Things the weekly ingest found but will not commit on its own: **new catalog ent
 
 The weekly run rewrites this file: it adds what it finds and removes what has been accepted. To accept an item, say so in the KALENDAR session and it gets committed to the catalog and struck from here.
 
-**Last updated:** 2026-11-01
+**Last updated:** 2026-11-08
+
+---
+
+## ⚠ The MyDramaList API is down, and this one may not come back
+
+Every path on `my-drama-list-api-ten.vercel.app`, the root included, now returns **HTTP 402 `DEPLOYMENT_DISABLED`**. That is Vercel switching the deployment off over billing, not the API erroring — it is categorically different from the HTTP 500 bursts and the two week-long outages this source has had before, and it will not clear on its own with a retry. It is somebody's unofficial side project, so it may never return.
+
+**What still works:** `i.mydramalist.com` serves images normally, so every poster already on file keeps rendering. DramaWiki and Soompi were both fine this run.
+
+**What this run could not do:** check any episode count, refresh any poster, discover a poster for a title that lacks one, or read any release pattern — `aired`, `aired_on` and `episodes` all came from that API. The Nov 1 run's `epsPerDrop` work and the stub-poster screen both depend on it too. The stub screen still ran against the embedded blobs and found none.
+
+**Worth deciding when you have a moment** (not urgent — nothing is broken, the catalog is just frozen on these fields): whether to find a replacement structured source. `mydramalist.com` itself is still blocked by this environment's network policy, so going direct would need that policy changed. Wikipedia is already a named source in Section 13, is properly licensed, and carries episode counts and air dates for titles that have an article. I have not gone looking for a replacement — say the word if you want me to.
 
 ---
 
 ## New titles awaiting review — 3
 
-Confirmed and dated on DramaWiki this run, matched by hangul, and absent from the catalog. Episode counts and posters are filled in where a MyDramaList record matched; a dash means the source genuinely had nothing.
+Unchanged from last week; all three were re-confirmed on DramaWiki this run. Episode counts and posters are from the last successful MyDramaList read, on 2026-11-01.
 
 | Air date | Network | Title | Hangul | Eps | Poster | Lead cast |
 |---|---|---|---|---|---|---|
@@ -18,44 +30,48 @@ Confirmed and dated on DramaWiki this run, matched by hangul, and absent from th
 | 2027-06-05 | tvN | Unnatural | 언내추럴 | 12 | yes | Im Yoon-ah, Lee Jin-wook, Cha Kang-yoon |
 | 2027-06 | MBC | The Wife | 더 와이프 | — | — | Kim Hee-sun, Go Soo |
 
-None of the three is urgent — the nearest is two months out. The Wife has no MyDramaList record under 더 와이프, so it would go in bare.
-
-**Deliberately not drafted:** *Love And Wifi In The Palace* (THE BOYZ's Younghoon, WJSN's Luda, Kim Dong-jun) got a first poster this week and reads like a drama, but Soompi's own copy calls it a film. Excluded on those grounds rather than added as a drama.
+Still nothing urgent — the nearest is seven weeks out.
 
 ---
 
-## Synopses awaiting review — 4
+## Synopses awaiting review — 6
 
-These catalog entries render "No summary on file for this one yet." in the detail sheet. Each premise below is sourced from Soompi's own coverage and would be rewritten fresh in KALENDAR's voice before going in — never copied or lightly reworded, per Section 14.
+These catalog entries render "No summary on file for this one yet." Each premise is from Soompi's own coverage and would be rewritten fresh in KALENDAR's voice before going in — never copied or lightly reworded, per Section 14.
 
 | Entry | Premise, as reported | Source |
 |---|---|---|
-| The Substitute | A crime thriller about three young men and a dangerous deal, set on college entrance exam day | Soompi, stills, 2026-10-30 |
-| Sacred Jewel | Goryeo, 1258: an expedition unit fighting near the end of the thirty-year war with Mongolia. Claudia Kim plays a princess who has shut herself off from the world | Soompi, first look, 2026-10-29 |
-| Crash 2: Fury Road | Kwak Sun-young's detective back behind the wheel, hunting criminals the traffic unit can't reach | Soompi, stills + teaser, 2026-10-30 |
-| Full Count | An SBS baseball drama; Kim Rae-won's character is set on winning. Thinner than the others — worth waiting a week for a fuller premise | Soompi, teaser, 2026-10-31 |
+| The Substitute | A crime thriller about three young men and a dangerous deal, set on college entrance exam day | Soompi, cast interview, 2026-11-05 |
+| Sacred Jewel | Goryeo, 1258: an expedition unit near the end of the thirty-year war with Mongolia. Claudia Kim is a princess shut off from the world; Yoon Kyun-sang a commander who is also her first love | Soompi, casting feature, 2026-11-06 |
+| Crash 2: Fury Road | Lee Min-ki's T.C.I. traffic-crime team takes on a new case, with Jisung joining as its newest member | Soompi, stills, 2026-11-06 |
+| Nine to Six | An office romance between Park Min-young's and Yook Sung-jae's characters | Soompi, behind-the-scenes teaser, 2026-11-06 |
+| One-of-a-Kind Romance | A webtoon adaptation; premieres 2026-11-09 | Soompi, cast interviews, 2026-11-06 |
+| Full Count | An SBS baseball drama; Kim Rae-won's character is set on winning | Soompi, teaser, 2026-10-31 |
+
+Full Count and One-of-a-Kind Romance are both still thin — one more week of coverage would give either a real premise rather than a genre label.
 
 ---
 
 ## Watching, not yet actionable
 
-Not drafted because something essential is missing, not because they were skipped.
-
-- **While You're Here** — Kim Hyang-gi and Ahn Dong-gu, a survival romance about a couple in their twenties, one an aspiring webtoon artist. DramaWiki still carries no row for it anywhere, so there is no hangul, network or date to anchor an entry. Unchanged for several weeks.
-- **Gracefully Killing You** (고분고분한 킬러, TVING) — **the title disagreement is resolved**: DramaWiki and Soompi now both call it *Gracefully Killing You*, not *The Obedient Killer*. Cast has firmed up to Kim Da-mi, Jo Bo-ah, Jo Ah-ram, Kim Jae-wook and Nam Yoon-soo. Still listed under a bare "2027" with no month, so there is no date to enter. Jo Ah-ram was injured during action prep on 2026-10-30.
-- **Family Matters 2** (가족계획 2, Coupang Play) — carried as "2026" with no month, and 2026 has two months left. Bae Doo-na, Baek Yoon-shik, Lomon. Waiting on a month.
+- **While You're Here** — Kim Hyang-gi and Ahn Dong-gu, a survival romance. DramaWiki still carries no row anywhere, so there is no hangul, network or date to anchor an entry. Unchanged for several weeks.
+- **Gracefully Killing You** (고분고분한 킬러, TVING) — title settled, cast settled (Kim Da-mi, Jo Bo-ah, Jo Ah-ram, Kim Jae-wook, Nam Yoon-soo), still listed under a bare "2027" with no month.
+- **Family Matters 2** (가족계획 2, Coupang Play) — still carried as "2026" with no month, and 2026 has seven weeks left. Bae Doo-na, Baek Yoon-shik.
 
 ## Known gaps that no source can currently close
 
-No MyDramaList record matches these, so none has an episode count or a poster.
+With the API down these cannot be re-checked at all this week; the list is carried forward from 2026-11-01.
 
-- **The Second Signal** (두 번째 시그널, tvN, 2026-12-07) — re-checked on both the hangul and the English title; still nothing. It airs in five weeks, so this is the one worth re-checking every run.
-- **Nightmare** (악몽, SBS, 2027-04-09) — 악몽 is common enough that the only hits are unrelated 1968 and 2020 dramas. Their posters are deliberately not used.
+- **The Second Signal** (두 번째 시그널, tvN, 2026-12-07) — no MyDramaList record under either title, so no episode count and no poster. tvN publicly confirmed the December premiere on 2026-11-06, and Soompi notes it had been set for June before being held over Cho Jin-woong's controversy. It premieres in four weeks and is the one still worth checking every run.
+- **Nightmare** (악몽, SBS, 2027-04-09) — the hangul only ever matches unrelated 1968 and 2020 dramas.
 - **Love O'Clock** (24분의 1 로맨스) and **Salon de Nabi** (날아올라라 나비).
-- **All of Us Are Dead 2** (지금 우리 학교는 2), despite being a major title. Its cast did expand on DramaWiki this run and that was applied.
-- **Happy Anding** (뜨거운 안녕, tvN, premieres 2026-11-11) — it has a poster on file from an earlier run, but no record surfaces under its hangul now; the only hit is a 1967 film. Nothing to refresh against, so the existing poster stands.
+- **All of Us Are Dead 2** (지금 우리 학교는 2).
+- **Happy Anding** (뜨거운 안녕, tvN) — premiered 2026-11-11; has a poster from an earlier run but no record surfaces under its hangul.
 
-### Notes carried forward from this run
+### Resolved this run
 
-- **The Long Shot Trial** was tracked at 2027-02-26 and is now **undated**. SBS's table lists it under a bare "2027" while Full Count holds Feb 26, and MyDramaList has no air date for it either. Two readings a week apart agree, which is the second reading this was waiting on, so it moved to the TBA bucket. It returns to a sorted position the moment a date reappears.
-- **Sword & Silence** matched a MyDramaList record whose native title is the shorter 문무 rather than the catalog's 대왕문무. It was accepted only because that record's own English title ("Sword & Silence") and episode count (28) match the catalog exactly. Flagging it because the hangul alone would not have justified it.
+- **Sword & Silence** was flagged last week because its MyDramaList record sat under the shorter 문무 while the catalog said 대왕문무, and the match rested on the English title and 28-episode count agreeing. DramaWiki's KBS row now spells it 문무 as well, so both sources agree and the catalog's `titleKr` was corrected to match. The flag is cleared.
+- **The Great Ok Suk** and **The Congressman Sends My Condolences** swapped tvN slots: Ok Suk moved up from Mar 13 to Jan 16, and the Congressman moved back from Jan 16 to Feb 27. Both rows carry explicit new dates, so this was applied without waiting for a second reading.
+
+### New this run
+
+- **`tools/mdl-slugs.json`** records which MyDramaList record each of 63 catalog entries resolves to. Resolving a slug used to cost a search plus up to six detail reads per title — about a thousand calls a run — and the mapping almost never changes. With the map, a run costs one read per entry. It is also the only surviving record of those identifiers now that the API is offline.
