@@ -4,55 +4,61 @@ Things the weekly ingest found but will not commit on its own: **new catalog ent
 
 The weekly run rewrites this file: it adds what it finds and removes what has been accepted. To accept an item, say so in the KALENDAR session and it gets committed to the catalog and struck from here.
 
-**Last updated:** 2026-11-15
+**Last updated:** 2026-11-22
 
 ---
 
-## ⚠ MyDramaList API still offline — week two
+## ⚠ MyDramaList API still offline — week three
 
-`my-drama-list-api-ten.vercel.app` still returns **HTTP 402 `DEPLOYMENT_DISABLED`** on every path. Unchanged, and still a billing shutdown rather than an outage.
+`my-drama-list-api-ten.vercel.app` still returns **HTTP 402 `DEPLOYMENT_DISABLED`** on every path. Three weeks, unchanged.
 
-Posters already on file keep rendering and the stub screen is clean (68 blobs, 0 stubs). But **the fourteen entries accepted on 2026-11-15 went in without posters**, and none of the long-standing poster gaps can be closed while this is down.
+Posters on file keep rendering and the stub screen is clean (68 blobs, 0 stubs), but nothing new can get a poster or an episode count, and the release-pattern derivation has no input. DramaWiki and Soompi have both carried the last three runs between them, and have been enough for dates, cast and premises — just not for those three fields.
 
-The replacement-source question is still open. Wikipedia is already a named source in Section 13 and would cover episode counts and air dates; it cannot cover posters, because its poster images are fair-use rather than freely licensed. Say the word if you want it scoped.
-
----
-
-## New titles awaiting review — 0
-
-Nothing held. All fourteen carried here from the 2026-11-15 run were accepted the same day and are in the catalog.
+Still open, and now worth a decision one way or the other: whether to put Wikipedia behind the episode-count and air-date gap. It is already a named source in Section 13 and properly licensed. It would **not** solve posters — Wikipedia's poster images are fair-use, not freely licensed — so that side stays stuck whatever happens. A plain "no, leave it" is a fine answer; I would rather stop re-raising it than keep it open indefinitely.
 
 ---
 
-## Synopses awaiting review — 0
+## New titles awaiting review — 1
 
-Nothing held. Seven were accepted and written on 2026-11-15: Crash 2, Sacred Jewel, Nine to Six, Tantara, The Substitute, One-of-a-Kind Romance and Full Count.
+| Air date | Network | Title | Hangul | Eps | Poster | Lead cast |
+|---|---|---|---|---|---|---|
+| 2026-12-18 | Coupang Play | Family Matters 2 | 가족계획 2 | — | — | Bae Doo-na, Baek Yoon-shik, Lomon, Lee Soo-hyun, Park Byung-eun |
 
-**Correction to last week's table:** it listed *Gift* as having no summary. It already had one, written back on 2026-09-10. Nothing was lost — it was a wrong entry in this file, not a gap in the catalog.
+**This one is time-sensitive** — it premieres in under four weeks. It has been sitting in "watching, not yet actionable" for a month as a bare "2026"; DramaWiki gave it a specific date this week. Soompi also ran the first main-cast look on 2026-11-19, so a synopsis could go in with it: a mother who can edit people's memories, taking on the bad guys alongside her family. Park Byung-eun joins the family this season.
+
+---
+
+## Synopses awaiting review — 2
+
+| Entry | Premise, as reported | Source |
+|---|---|---|
+| Your Ground | A baseball player whose career has stalled (Gong Myung as Kang Hae-hwan) and the former lawyer turned sports agent who takes him on (Han Hyo-joo as Seo Hee-seung). Kim Shin-rok plays the agency's CEO | Soompi, first stills, 2026-11-19 |
+| Good Partner 2 | Divorce law, second season. Jang Na-ra returns as star lawyer Cha Eun-kyung and sets out to recruit Kim Hye-yoon onto her team | Soompi, cast keywords + premiere coverage, 2026-11-19/21 |
+
+Good Partner 2 premiered on 2026-11-20, above season one's ratings and first in its slot.
 
 ---
 
 ## Watching, not yet actionable
 
-- **Portraits of Delusion** (현혹, Disney+) — tracked at December 2026; DramaWiki moved it to a bare "2027" on 2026-11-14. **This is the one to settle next run.** It is a first reading, so nothing changed, but if it is real the catalog is advertising a date three weeks out for a show that has slipped a year. Second reading due 2026-11-22.
-- **Wild Flowers Bloom in the Palace** (궁에는 개꽃이 산다, MBC) — tracked at May 2027, dropped to a bare "2027" the same week. Also a first reading, also unchanged. Lower stakes than the above.
-- **The Wife** (더 와이프, MBC) — Kim Hee-sun and Go Soo. Held at 2027-06 last week, now back to a bare "2027", so it has no month to enter on. Returns to the table when one does.
-- **While You're Here** — Kim Hyang-gi and Ahn Dong-gu. DramaWiki still carries no row anywhere; no hangul, network or date. Unchanged for several weeks.
+- **Embassy for Foreign Monsters in Korea** (주한이국대사관, tvN) — accepted into the catalog on 2026-11-15 at 2027-08-28; tvN's row dropped it to a bare "2027" this week. **First reading of the withdrawal**, so the catalog is unchanged. Second reading due 2026-11-29. Low stakes — it is nine months out either way.
+- **Your Ground** (너의 그라운드, MBC) — Soompi has begun calling this ***On* Your Ground**, where DramaWiki still says *Your Ground*. The hangul is unchanged and literally reads "Your Ground", so this may just be Soompi's styling rather than a retitle. Not applied on one source; watching for DramaWiki to agree.
+- **The Wife** (더 와이프, MBC) — Kim Hee-sun and Go Soo, still a bare "2027".
+- **While You're Here** — Kim Hyang-gi and Ahn Dong-gu. DramaWiki still carries no row anywhere; no hangul, network or date. Unchanged for weeks.
 - **Gracefully Killing You** (고분고분한 킬러, TVING) — title and cast settled, still a bare "2027".
-- **Family Matters 2** (가족계획 2, Coupang Play) — still "2026" with no month, six weeks of 2026 left.
-- **Wi-Fi Love in the Palace** — excluded as a film for three weeks. Soompi now tags it both Film and TV/Film and its copy no longer says which, so the format is unconfirmed rather than settled. Still out, but no longer on firm ground.
+- **Wi-Fi Love in the Palace** — Soompi tags it both Film and TV/Film and its copy does not say which, so the format stays unconfirmed. Still excluded.
 
 ## Known gaps that no source can currently close
 
-Cannot be re-checked while the API is down.
-
-- **The Second Signal** (두 번째 시그널, tvN, 2026-12-07) — **premieres in three weeks**, still no episode count and no poster. The most conspicuous gap in the catalog.
-- **The fourteen titles accepted on 2026-11-15** — all went in without posters, and all but Wolves in Suits and Unnatural without an episode count.
+- **The Second Signal** (두 번째 시그널, tvN) — **premieres 2026-12-07, a fortnight away**, still no episode count and no poster. The most conspicuous gap in the catalog, and it will still be there on premiere day unless the API returns.
+- **The fourteen titles accepted on 2026-11-15** — all without posters; all but Wolves in Suits and Unnatural without an episode count.
 - **Nightmare** (악몽, SBS), **Love O'Clock** (24분의 1 로맨스), **Salon de Nabi** (날아올라라 나비), **All of Us Are Dead 2** (지금 우리 학교는 2), **Happy Anding** (뜨거운 안녕).
 
-### Resolved on 2026-11-15
+### Resolved on 2026-11-22
 
-- **The Remarried Empress had the wrong release shape**, reported by the user: four episodes on its premiere Wednesday and two each Wednesday after, six out as of Nov 15, where the app was showing a plain weekly grid. Now `airLabel: "Wed"` with `epsPerDrop: 2, firstDrop: 4`, which generates 4/2/2/2 across Nov 4, 11, 18 and 25 and reads 6 of 10 released. **The lesson is that front-loading is not a TVING habit** — this is Disney+, and Section 13 has been corrected to stop treating it as one.
-- **Two "poster: yes" claims in this file were wrong.** Wolves in Suits and Unnatural were recorded as having posters from the last good MyDramaList read. Screened on the way into the catalog, both URLs turned out to be the grey "poster not released yet" stub, so neither went in with one. Section 14 now says to screen a URL before recording that a poster exists, not only before writing it.
-- **Two air labels recovered without MyDramaList.** One-of-a-Kind Romance is Mon / Tue — from Nov 9, that puts episode 12 on Dec 15, its reported finale date, and Nov 9 is itself a Monday. Full Count is Fri / Sat, reported as a Friday–Saturday series with a Feb 26 2027 premiere that is a Friday. Both also gained crew or premise detail from the same coverage.
-- **Doctor X** finished on 2026-11-14 at 15.2% nationwide. Its pattern was pinned down from its own Friday start date, Soompi's Saturday finale report and the 12 episodes on file: Fri / Sat over six weekends is exactly 12 ending Nov 14.
+Both of last week's flagged withdrawals held on a second reading and were applied:
+
+- **Portraits of Delusion** (현혹, Disney+) moved from December 2026 to the TBA bucket. This was the one that mattered — the catalog had been advertising a date three weeks out for a show that has slipped out of 2026 entirely.
+- **Wild Flowers Bloom in the Palace** (궁에는 개꽃이 산다, MBC) moved from May 2027 to TBA.
+
+Both keep their `id`, cast, episode count and synopsis, and will sort straight back into place if a date returns.
